@@ -1,6 +1,6 @@
 // File: C:\Users\94234\Downloads\voxel-toy-box-supert10-1-main\components\TopBar.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Bird, Cat, Rabbit, Users, ChevronDown, Plus, Share2, Pause, Play, Palette, Layers, Grid3X3, Maximize2, FlipHorizontal } from 'lucide-react';
+import { Bird, Cat, Rabbit, Users, ChevronDown, Plus, Share2, Pause, Play, Palette, Layers, Maximize2, FlipHorizontal } from 'lucide-react';
 import { AdvancedParams } from './AdvancedParametersPanel';
 import { AppMode } from './ModeSelection';
 
@@ -71,18 +71,18 @@ export const TopBar: React.FC<TopBarProps> = ({
   const selectedInfo = MODEL_INFO[selectedModel];
 
   return (
-    <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
-      <div className="flex items-center gap-3">
+    <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 flex justify-between items-start z-20">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* 模型选择器 */}
-        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-xl rounded-xl shadow-lg px-4 py-2.5 border border-gray-200">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Model</span>
+        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-xl rounded-xl shadow-lg px-2 sm:px-4 py-2 sm:py-2.5 border border-gray-200">
+          <span className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:inline">Model</span>
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-              className={`flex items-center gap-2 px-3 py-1.5 ${selectedInfo.bgColor}/10 hover:${selectedInfo.bgColor}/20 rounded-lg transition-all duration-200 font-semibold text-gray-700 border border-transparent hover:border-gray-300`}
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 ${selectedInfo.bgColor}/10 hover:${selectedInfo.bgColor}/20 rounded-lg transition-all duration-200 font-semibold text-gray-700 border border-transparent hover:border-gray-300 text-sm`}
             >
               <span className={selectedInfo.color}>{selectedInfo.icon}</span>
-              <span>{selectedInfo.label}</span>
+              <span className="hidden sm:inline">{selectedInfo.label}</span>
               <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isModelMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -157,11 +157,6 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
             <div className="w-px h-5 bg-gray-200" />
             <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-blue-500/10">
-              <Grid3X3 size={13} className="text-blue-500" />
-              <span className="text-xs font-semibold text-gray-700 capitalize">{currentParams.complexity}</span>
-            </div>
-            <div className="w-px h-5 bg-gray-200" />
-            <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-blue-500/10">
               <Maximize2 size={13} className="text-blue-500" />
               <span className="text-xs font-semibold text-gray-700 capitalize">{currentParams.size}</span>
             </div>
@@ -174,15 +169,15 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* 体素计数显示 */}
-        <div className="flex items-center gap-3 px-4 py-2.5 bg-white/90 backdrop-blur-xl rounded-xl shadow-lg border border-gray-200">
-          <div className={`p-2 rounded-lg ${selectedInfo.bgColor}/10`}>
-            <span className={`${selectedInfo.color} font-black text-sm`}>{voxelCount.toLocaleString()}</span>
+        <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 bg-white/90 backdrop-blur-xl rounded-xl shadow-lg border border-gray-200">
+          <div className={`p-1.5 sm:p-2 rounded-lg ${selectedInfo.bgColor}/10`}>
+            <span className={`${selectedInfo.color} font-black text-xs sm:text-sm`}>{voxelCount.toLocaleString()}</span>
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Voxels</span>
-            <span className="text-xs text-gray-500 font-medium">{selectedInfo.label}</span>
+            <span className="text-[8px] sm:text-[10px] uppercase tracking-wider text-gray-400 font-bold hidden sm:inline">Voxels</span>
+            <span className="text-[10px] sm:text-xs text-gray-500 font-medium hidden sm:inline">{selectedInfo.label}</span>
           </div>
         </div>
 
@@ -190,9 +185,9 @@ export const TopBar: React.FC<TopBarProps> = ({
         {onShare && (
           <button
             onClick={onShare}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-xl shadow-lg transition-all duration-200"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 text-sm"
           >
-            <Share2 size={16} />
+            <Share2 size={14} sm:size={16} />
             <span className="hidden sm:inline">Share</span>
           </button>
         )}

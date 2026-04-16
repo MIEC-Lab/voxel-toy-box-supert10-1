@@ -36,7 +36,6 @@ export const MVPPage: React.FC<MVPPageProps> = ({ onGenerate, onVoxelsGenerated,
   const [advancedParams, setAdvancedParams] = useState<AdvancedParams>({
     style: 'realistic',
     colorScheme: 'vibrant',
-    complexity: 'medium',
     size: 'medium',
     symmetry: 'none'
   });

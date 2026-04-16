@@ -4,7 +4,6 @@ import { ChevronDown, Palette, Layers, Maximize2, Repeat, Settings2 } from 'luci
 export interface AdvancedParams {
   style: 'realistic' | 'cartoon' | 'abstract';
   colorScheme: 'vibrant' | 'pastel' | 'monochrome' | 'nature';
-  complexity: 'simple' | 'medium' | 'complex';
   size: 'small' | 'medium' | 'large';
   symmetry: 'none' | 'bilateral' | 'radial';
 }
@@ -43,10 +42,10 @@ export const AdvancedParametersPanel: React.FC<AdvancedParametersPanelProps> = (
       </button>
 
       {isExpanded && (
-        <div className="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="px-3 sm:px-4 pb-3 sm:pb-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <ParamSelect
             label="Style"
-            icon={<Palette size={16} />}
+            icon={<Palette size={14} sm:size={16} />}
             value={params.style}
             options={[
               { value: 'realistic', label: 'Realistic' },
@@ -58,7 +57,7 @@ export const AdvancedParametersPanel: React.FC<AdvancedParametersPanelProps> = (
 
           <ParamSelect
             label="Color"
-            icon={<Palette size={16} />}
+            icon={<Palette size={14} sm:size={16} />}
             value={params.colorScheme}
             options={[
               { value: 'vibrant', label: 'Vibrant' },
@@ -70,20 +69,8 @@ export const AdvancedParametersPanel: React.FC<AdvancedParametersPanelProps> = (
           />
 
           <ParamSelect
-            label="Complexity"
-            icon={<Layers size={16} />}
-            value={params.complexity}
-            options={[
-              { value: 'simple', label: 'Simple' },
-              { value: 'medium', label: 'Medium' },
-              { value: 'complex', label: 'Complex' }
-            ]}
-            onChange={(v) => updateParam('complexity', v as AdvancedParams['complexity'])}
-          />
-
-          <ParamSelect
             label="Size"
-            icon={<Maximize2 size={16} />}
+            icon={<Maximize2 size={14} sm:size={16} />}
             value={params.size}
             options={[
               { value: 'small', label: 'Small' },
@@ -95,7 +82,7 @@ export const AdvancedParametersPanel: React.FC<AdvancedParametersPanelProps> = (
 
           <ParamSelect
             label="Symmetry"
-            icon={<Repeat size={16} />}
+            icon={<Repeat size={14} sm:size={16} />}
             value={params.symmetry}
             options={[
               { value: 'none', label: 'None' },
@@ -120,14 +107,15 @@ interface ParamSelectProps {
 
 const ParamSelect: React.FC<ParamSelectProps> = ({ label, icon, value, options, onChange }) => (
   <div className="flex flex-col gap-1">
-    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+    <label className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
       {icon}
-      {label}
+      <span className="hidden sm:inline">{label}</span>
+      <span className="sm:hidden">{label.substring(0, 3)}</span>
     </label>
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100"
+      className="px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 text-xs sm:text-sm"
     >
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>

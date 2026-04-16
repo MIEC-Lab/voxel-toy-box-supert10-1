@@ -27,7 +27,6 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
   const [advancedParams, setAdvancedParams] = useState<AdvancedParams>({
     style: 'realistic',
     colorScheme: 'vibrant',
-    complexity: 'medium',
     size: 'medium',
     symmetry: 'none'
   });
@@ -52,8 +51,8 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
   };
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white/95 via-gray-100/90 to-transparent p-4 pt-16 backdrop-blur-sm">
-      <div className="max-w-4xl mx-auto space-y-3">
+    <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white/95 via-gray-100/90 to-transparent p-3 sm:p-4 pt-12 sm:pt-16 backdrop-blur-sm">
+      <div className="max-w-4xl mx-auto space-y-2 sm:space-y-3">
         {/* 输入框组件 */}
         <PromptInput
           onSubmit={handleSubmit}

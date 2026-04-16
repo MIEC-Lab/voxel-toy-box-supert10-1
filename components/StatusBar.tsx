@@ -22,12 +22,6 @@ const colorLabels = {
   nature: 'Nature'
 };
 
-const complexityLabels = {
-  simple: 'Simple',
-  medium: 'Medium',
-  complex: 'Complex'
-};
-
 const sizeLabels = {
   small: 'Small',
   medium: 'Medium',
@@ -53,11 +47,6 @@ export const StatusBar: React.FC<StatusBarProps> = ({ params, voxelCount, onCopy
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-400">Color</span>
           <span className="text-xs font-semibold text-slate-700">{colorLabels[params.colorScheme]}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-400">Complexity</span>
-          <span className="text-xs font-semibold text-slate-700">{complexityLabels[params.complexity]}</span>
         </div>
 
         <div className="flex items-center gap-2">

@@ -44,7 +44,6 @@ const App: React.FC = () => {
   const [currentParams, setCurrentParams] = useState<AdvancedParams>({
     style: 'realistic',
     colorScheme: 'vibrant',
-    complexity: 'medium',
     size: 'medium',
     symmetry: 'none'
   });
