@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-
+//Chen Yanzi
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -36,10 +36,12 @@ export class VoxelEngine {
     this.onStateChange = onStateChange;
     this.onCountChange = onCountChange;
 
-    // Init Three.js
+    // Init Three.js 
+    // Chen Yanzi
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(CONFIG.BG_COLOR);
-    this.scene.fog = new THREE.Fog(CONFIG.BG_COLOR, 60, 140); // Reduced haze
+    // 移除fog效果，避免拉远后虚化
+    // this.scene.fog = new THREE.Fog(CONFIG.BG_COLOR, 60, 140); // Reduced haze
 
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     // Slightly zoomed out start position
@@ -72,9 +74,10 @@ export class VoxelEngine {
     dirLight.shadow.camera.bottom = -40;
     this.scene.add(dirLight);
 
-    // Floor
+    // Floor - Increased size for infinite appearance 
+    // Chen Yanzi
     const planeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 1 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), planeMat);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), planeMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = CONFIG.FLOOR_Y;
     floor.receiveShadow = true;
