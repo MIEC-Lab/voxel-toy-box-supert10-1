@@ -16,31 +16,31 @@ import { PresetModel } from './components/ModelSelector';
 import { ModeSelection, AppMode } from './components/ModeSelection';
 
 /**
- * 主应用组件
- * 管理整个voxel玩具盒应用的状态和逻辑
+ * Main application component
+ * Manages the state and logic of the entire voxel toy box application
  */
 const App: React.FC = () => {
-  // 容器引用，用于渲染3D场景
+  // Container reference for rendering 3D scene
   const containerRef = useRef<HTMLDivElement>(null);
-  // Voxel引擎引用，用于操作3D模型
+  // Voxel engine reference for manipulating 3D models
   const engineRef = useRef<VoxelEngine | null>(null);
 
-  // 应用状态管理
+  // Application state management
   const [appState, setAppState] = useState<AppState>(AppState.STABLE);
   const [voxelCount, setVoxelCount] = useState<number>(0);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedModel, setSelectedModel] = useState<PresetModel>('Eagle');
 
-  // 生成结果相关状态
+  // Generation result related states
   const [generationMetadata, setGenerationMetadata] = useState<GenerationMetadata | undefined>();
   const [templateMatch, setTemplateMatch] = useState<TemplateMatchResult | undefined>();
   const [error, setError] = useState<string | undefined>();
   
-  // 3D视图控制
+  // 3D view controls
   const [isAutoRotate, setIsAutoRotate] = useState(true);
   
-  // 高级参数设置
+  // Advanced parameter settings
   const [currentParams, setCurrentParams] = useState<AdvancedParams>({
     style: 'realistic',
     colorScheme: 'vibrant',
@@ -48,15 +48,15 @@ const App: React.FC = () => {
     symmetry: 'none'
   });
   
-  // 应用模式（快速/专家）
+  // Application mode (quick/expert)
   const [appMode, setAppMode] = useState<AppMode | null>(null);
 
   /**
-   * 组件挂载时初始化
-   * - 创建Voxel引擎实例
-   * - 加载初始模型
-   * - 监听窗口大小变化
-   * - 自动隐藏欢迎屏幕
+   * Initialize on component mount
+   * - Create Voxel engine instance
+   * - Load initial model
+   * - Listen for window size changes
+   * - Auto hide welcome screen
    */
   useEffect(() => {
     if (!containerRef.current) return;
@@ -83,9 +83,9 @@ const App: React.FC = () => {
   }, []);
 
   /**
-   * 计算生成结果的元数据
-   * @param voxels 体素数据数组
-   * @returns 生成元数据对象
+   * Calculate generation result metadata
+   * @param voxels Voxel data array
+   * @returns Generation metadata object
    */
   const calculateMetadata = (voxels: VoxelData[]): GenerationMetadata => {
     if (voxels.length === 0) {
@@ -123,8 +123,8 @@ const App: React.FC = () => {
   };
 
   /**
-   * 处理模型切换
-   * @param model 选中的预设模型
+   * Handle model change
+   * @param model Selected preset model
    */
   const handleModelChange = (model: PresetModel) => {
     setSelectedModel(model);
@@ -137,7 +137,7 @@ const App: React.FC = () => {
   };
 
   /**
-   * 切换自动旋转状态
+   * Toggle auto-rotate state
    */
   const handleToggleRotate = () => {
     const newState = !isAutoRotate;
@@ -148,15 +148,15 @@ const App: React.FC = () => {
   };
 
   /**
-   * 添加模型功能（预留接口）
+   * Add model feature (reserved interface)
    */
   const handleAddModel = () => {
     alert('Add model feature - connect to your custom model importer');
   };
 
   /**
-   * 分享功能
-   * 将体素数据复制到剪贴板
+   * Share functionality
+   * Copy voxel data to clipboard
    */
   const handleShare = () => {
     if (engineRef.current) {
@@ -170,9 +170,9 @@ const App: React.FC = () => {
   };
 
   /**
-   * 处理生成请求
-   * @param prompt 用户输入的提示词
-   * @param params 高级参数设置
+   * Handle generation request
+   * @param prompt User input prompt
+   * @param params Advanced parameter settings
    */
   const handleSubmit = async (prompt: string, params: AdvancedParams) => {
     setError(undefined);
@@ -181,12 +181,12 @@ const App: React.FC = () => {
     setIsGenerating(true);
 
     try {
-      // 模拟生成延迟
+      // Simulate generation delay
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       let voxels: VoxelData[] = [];
 
-      // 根据风格参数选择不同的生成器
+      // Select different generator based on style parameter
       switch (params.style) {
         case 'realistic':
           voxels = Generators.Eagle();
@@ -201,7 +201,7 @@ const App: React.FC = () => {
           voxels = Generators.Eagle();
       }
 
-      // 随机调整颜色
+      // Randomly adjust colors
       if (voxels.length > 0) {
         voxels = voxels.map(v => ({
           ...v,
@@ -209,16 +209,16 @@ const App: React.FC = () => {
         }));
       }
 
-      // 加载生成的模型
+      // Load generated model
       if (engineRef.current) {
         engineRef.current.loadInitialModel(voxels);
       }
 
-      // 计算并显示元数据
+      // Calculate and display metadata
       const metadata = calculateMetadata(voxels);
       setGenerationMetadata(metadata);
 
-      // 模拟模板匹配结果
+      // Simulate template matching result
       const isTemplateMatch = Math.random() > 0.5;
       if (isTemplateMatch) {
         setTemplateMatch({
@@ -237,36 +237,64 @@ const App: React.FC = () => {
   };
 
   /**
-   * 重试生成
+   * Retry generation
    */
   const handleRetry = () => {
     setError(undefined);
   };
 
   /**
-   * 关闭错误提示
+   * Dismiss error message
    */
   const handleDismissError = () => {
     setError(undefined);
   };
+//Chen Yanzi
+  /**
+   * Return to home page
+   */
+  const handleHome = () => {
+    setAppMode(null);
+    setShowWelcome(false);
+    setIsGenerating(false);
+    setError(undefined);
+  };
+
+  /**
+   * Dismantle model
+   */
+  const handleDismantle = () => {
+    engineRef.current?.dismantle();
+  };
+
+  /**
+   * Rebuild model
+   */
+  const handleRebuild = () => {
+    const generator = Generators[selectedModel];
+    if (generator) {
+      const modelData = generator();
+      engineRef.current?.rebuild(modelData);
+    }
+  };
 
   return (
     <div className="relative w-full h-screen bg-[#f0f2f5] overflow-hidden">
-      {/* 3D渲染容器 */}
+      {/* 3D rendering container */}
       <div ref={containerRef} className="absolute inset-0 z-0" />
 
-      {/* 模式选择界面 */}
+      {/* Mode selection interface */}
       {appMode === null && (
         <ModeSelection onSelect={setAppMode} />
       )}
 
-      {/* 主应用界面 */}
+      {/* Main application interface */}
       {appMode !== null && (
         <>
-          {/* 欢迎屏幕 */}
+          {/* Welcome screen */}
           <WelcomeScreen visible={showWelcome} />
 
-          {/* 顶部导航栏 */}
+          {/* Top navigation bar */}
           <TopBar
             appMode={appMode}
             selectedModel={selectedModel}
@@ -275,11 +303,14 @@ const App: React.FC = () => {
             isAutoRotate={isAutoRotate}
             onToggleRotate={handleToggleRotate}
             onShare={handleShare}
+            onHome={handleHome}
+            onDismantle={handleDismantle}
+            onRebuild={handleRebuild}
             voxelCount={voxelCount}
             currentParams={currentParams}
           />
 
-          {/* 状态面板（显示生成结果和错误） */}
+          {/* Status panel (shows generation results and errors) */}
           <StatusPanel
             metadata={generationMetadata}
             templateMatch={templateMatch}
@@ -288,7 +319,7 @@ const App: React.FC = () => {
             onDismissError={handleDismissError}
           />
 
-          {/* 底部面板（输入框和参数设置） */}
+          {/* Bottom panel (input box and parameter settings) */}
           <BottomPanel
             onSubmit={handleSubmit}
             isGenerating={isGenerating}
