@@ -19,11 +19,15 @@ export default async (req: Request, context: Context) => {
   try {
     // const {systemContext} = context.params;
     console.log("Received request in lego-gemini function");
-    const data = await req.json();
-    const { systemContext, prompt } = data;
+    const data = await req.json() as LegoApiCallRequest;
+    //Bian: support either `options` or legacy/new frontend `params`.
+    const { systemContext, prompt, options, params } = data;
+    const generationOptions: GenerationOptions | undefined = options ?? params;
     console.log("Received systemContext:", systemContext);
+    console.log("Generation mode:", generationOptions ? "expert-two-stage" : "fast-single-stage");
 
-    const response = await callGeminiStream(systemContext, prompt);
+    const response = await callGeminiStream(systemContext, prompt, generationOptions);
+    
     const readableStream = new ReadableStream({
       async start(controller) {
         for await (const chunk of response) {
