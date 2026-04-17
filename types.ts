@@ -12,9 +12,32 @@ export enum AppState {
   REBUILDING = 'REBUILDING'
 }
 
+// Bian: align backend generation options with the advanced frontend params.
+export interface GenerationOptions {
+  style?: 'realistic' | 'cartoon' | 'abstract';
+  colorScheme?: 'vibrant' | 'pastel' | 'monochrome' | 'nature';
+  size?: 'small' | 'medium' | 'large';
+  symmetry?: 'none' | 'bilateral' | 'radial';
+}
+
+// Bian: first-stage structured intent for more controllable voxel generation.
+export interface ModelIntent {
+  subject: string;
+  style: NonNullable<GenerationOptions['style']>;
+  colorScheme: NonNullable<GenerationOptions['colorScheme']>;
+  size: NonNullable<GenerationOptions['size']>;
+  symmetry: NonNullable<GenerationOptions['symmetry']>;
+  voxelBudget: number;
+  silhouetteKeywords: string[];
+  structuralRules: string[];
+}
+
 export interface LegoApiCallRequest {
   systemContext: string;
   prompt: string;
+  // Bian: accept advanced frontend controls without breaking the old prompt-only flow.
+  options?: GenerationOptions;
+  params?: GenerationOptions;
 }
 export interface VoxelData {
   x: number;
