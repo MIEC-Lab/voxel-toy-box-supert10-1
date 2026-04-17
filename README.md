@@ -23,7 +23,7 @@ View your app in AI Studio: https://ai.studio/apps/drive/1pF4WKSt5t07yj2fk7sCbL4
 
 ## Shared MVP Types
 
-The shared request/response types for frontend-backend integration live in [types.ts](/C:/Users/15925/Documents/New project/voxel-toy-box-supert10-1-main/types.ts).
+The shared request/response types for frontend-backend integration live in [types.ts](/C:/Users/33852/Desktop/voxel-toy-box-supert10-1-main/types.ts).
 
 ```ts
 interface MVPRequest {
@@ -32,7 +32,7 @@ interface MVPRequest {
 
 interface MVPResponse {
   success: boolean;
-  voxels?: number[];
+  voxels?: VoxelData[];
   error?: string;
 }
 ```
@@ -70,5 +70,21 @@ Response fields include:
 - `intent`
 - `error` and `errorCode` on failure
 
-More backend details are documented in [docs/backend-postprocess.md](/C:/Users/15925/Documents/New project/voxel-toy-box-supert10-1-main/docs/backend-postprocess.md).
+More backend details are documented in [docs/backend-postprocess.md](/C:/Users/33852/Desktop/voxel-toy-box-supert10-1-main/docs/backend-postprocess.md).
 
+## Member 2 Integration Notes
+
+Member 2 owns the shared API contract and should coordinate with:
+
+- Member 1: confirm frontend request payload and response field names
+- Member 3: confirm `GenerationOptions` and `ModelIntent` field semantics
+- Member 4: confirm template/database payloads can map to `TemplateMatchResult`
+- Member 5: confirm `/.netlify/functions/lego-gemini` returns the unified backend response shape
+- Member 6: confirm the renderer consumes `VoxelData[]` with numeric `color`
+
+Current unified contract highlights:
+
+- `LegoApiCallRequest` supports `prompt`, `systemContext`, `options`, `params`, `mode`, and `useTwoStage`
+- `BackendGenerationResponse` returns `success`, `voxels`, `warnings`, `stats`, `metadata`, `templateMatch`, `mode`, `usedTwoStage`, `intent`, `error`, and `errorCode`
+- `MVPResponse.voxels` is standardized as `VoxelData[]`
+  
