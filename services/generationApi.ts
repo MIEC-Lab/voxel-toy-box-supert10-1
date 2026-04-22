@@ -1,25 +1,16 @@
-
-import {
-  GenerationOptions,
-  VoxelData
-} from '../../../types';
-
+// 所有导入统一放在文件顶部（正确语法）
+import type { BackendGenerationResponse, GenerationOptions } from '../../../types';
+import { VoxelData } from '../../../types';
 import './endpoints/api';
 
-const DEFAULT_SYSTEM_CONTEXT = [
-  import type {
-  BackendGenerationResponse,
-     GenerationOptions,
-    VoxelData
-} from '../../../types';
-
-import './endpoints/api';
+// 系统提示语（唯一定义，无重复）
 const DEFAULT_SYSTEM_CONTEXT = [
   'You are a creative voxel art generator.',
   'Always return valid JSON only.',
   'Keep the result centered, connected, and visually readable.',
 ].join(' ');
 
+// 核心生成函数
 export async function generateVoxelModel(
   prompt: string,
   options: GenerationOptions,
@@ -42,11 +33,7 @@ export async function generateVoxelModel(
   return response as BackendGenerationResponse & { voxels: VoxelData[] };
 }
 
- 
-];
-
-
+// 备用生成函数
 export async function generateVoxelData(options: GenerationOptions): Promise<VoxelData> {
- 
   return {} as VoxelData;
 }
