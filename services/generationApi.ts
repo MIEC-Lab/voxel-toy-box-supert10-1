@@ -3,7 +3,7 @@ import type {
   GenerationOptions,
   VoxelData,
 } from '../../../types';
-import ... from './endpoints/api'
+import './endpoints/api'
 
 const DEFAULT_SYSTEM_CONTEXT = [
   'You are a creative voxel art generator.',
