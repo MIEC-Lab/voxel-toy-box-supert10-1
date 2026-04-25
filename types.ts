@@ -4,7 +4,7 @@
 */
 
 
-import * as THREE from 'three';
+import type * as THREE from 'three';
 
 export enum AppState {
   STABLE = 'STABLE',
@@ -131,6 +131,12 @@ export interface BackendGenerationResponse {
   intent?: ModelIntent;
   error?: string;
   errorCode?: string;
+}
+
+export interface DatabaseHealthStatus {
+  ok: boolean;
+  mode: 'postgres' | 'embedded' | 'noop';
+  message: string;
 }
 
 export interface DatabaseReport {
