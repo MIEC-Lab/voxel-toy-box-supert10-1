@@ -7,6 +7,7 @@
 # Voxel Toy Box
 
 Vercel-first voxel generation app with a React frontend, a server-side Gemini API, and Postgres-backed generation logging.
+It now also includes a Vercel route for calling Kimi (Moonshot) with the same voxel-generation contract.
 
 ## Local Development
 
@@ -18,7 +19,7 @@ Prerequisites:
 
 Setup:
 1. Copy `.env.example` to `.env.local`
-2. Fill in `GEMINI_API_KEY`
+2. Fill in `GEMINI_API_KEY` and/or `KIMI_API_KEY`
 3. Choose one database path for local testing:
 	- Fill in `DATABASE_URL` for a real Postgres instance
 	- Or set `LOCAL_DB_MODE=memory` for the in-memory database used in local connectivity tests
@@ -66,6 +67,7 @@ npm.cmd run build
 Primary backend endpoint:
 ```text
 /api/lego-gemini
+/api/lego-kimi
 ```
 
 Debug endpoints:
@@ -77,10 +79,22 @@ Debug endpoints:
 ## Environment Variables
 
 - `GEMINI_API_KEY`: required for server-side generation
+- `KIMI_API_KEY`: required for server-side Kimi generation
+- `KIMI_MODEL`: optional override for the Kimi model, defaults to `moonshot-v1-8k`
 - `DATABASE_URL`: optional Postgres connection string for persistent generation logs
 - `LOCAL_DB_MODE=memory`: enables the embedded local database when no real Postgres is available
 - `LOCAL_PROXY_URL`: optional explicit outbound proxy for local Node server calls; if omitted on Windows, the app will also try to detect the user-level system proxy
 - `VITE_API_BASE_URL`: optional frontend override, defaults to `/api/`
+
+## Kimi Vercel Route
+
+Kimi is exposed as a server-side Vercel route at:
+
+```text
+/api/lego-kimi
+```
+
+It follows the same request and response shape as `/api/lego-gemini`, so existing frontend code or test harnesses can switch providers with only an endpoint change.
 
 ## Proxy Notes
 
