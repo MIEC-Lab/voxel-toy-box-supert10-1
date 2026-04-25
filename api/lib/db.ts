@@ -1,4 +1,3 @@
-import { newDb } from 'pg-mem';
 import { Pool, type QueryResultRow } from 'pg';
 
 export interface GenerationLogRecord extends QueryResultRow {
@@ -81,26 +80,11 @@ const CREATE_INDEX_SQL = `
   on generation_logs (created_at desc);
 `;
 
-const EMBEDDED_CREATE_TABLE_SQL = `
-  create table generation_logs (
-    id integer,
-    prompt text,
-    generation_options jsonb,
-    success boolean,
-    voxel_count integer,
-    color_count integer,
-    warnings jsonb,
-    template_match jsonb,
-    error_message text,
-    created_at timestamptz
-  );
-`;
-
 let db: DatabaseClient | null = null;
 let pool: Pool | null = null;
-let embeddedDb: ReturnType<typeof newDb> | null = null;
 let schemaReadyPromise: Promise<void> | null = null;
 let embeddedGenerationLogId = 1;
+let embeddedGenerationLogs: GenerationLogRecord[] = [];
 
 function getDatabaseUrl() {
   return (
@@ -115,22 +99,6 @@ function isEmbeddedDbEnabled() {
   return process.env.LOCAL_DB_MODE === 'memory';
 }
 
-function getEmbeddedPool() {
-  if (pool) {
-    return pool;
-  }
-
-  if (!embeddedDb) {
-    embeddedDb = newDb({ autoCreateForeignKeyIndices: true });
-    embeddedDb.public.none(EMBEDDED_CREATE_TABLE_SQL);
-    embeddedDb.public.none(CREATE_INDEX_SQL);
-  }
-
-  const { Pool: EmbeddedPool } = embeddedDb.adapters.createPg();
-  pool = new EmbeddedPool();
-  return pool;
-}
-
 function getPool() {
   if (pool) {
     return pool;
@@ -139,10 +107,6 @@ function getPool() {
   const connectionString = getDatabaseUrl();
 
   if (!connectionString) {
-    if (isEmbeddedDbEnabled()) {
-      return getEmbeddedPool();
-    }
-
     return null;
   }
 
@@ -163,11 +127,6 @@ async function ensureSchemaReady() {
 
   if (!client) {
     return;
-  }
-
-  if (isEmbeddedDbEnabled()) {
-    schemaReadyPromise = Promise.resolve();
-    return schemaReadyPromise;
   }
 
   schemaReadyPromise = (async () => {
@@ -197,41 +156,48 @@ function createNoopClient(): DatabaseClient {
   };
 }
 
+function createEmbeddedClient(): DatabaseClient {
+  return {
+    mode: 'embedded',
+    async insertGenerationLog(payload) {
+      embeddedGenerationLogs.push({
+        id: embeddedGenerationLogId++,
+        ...payload,
+      });
+    },
+    async listGenerationLogs(limit = 10) {
+      return [...embeddedGenerationLogs]
+        .sort((left, right) => right.created_at.localeCompare(left.created_at))
+        .slice(0, limit);
+    },
+    async healthCheck() {
+      return {
+        ok: true,
+        mode: 'embedded',
+        message: 'Embedded in-memory database is ready.',
+      };
+    },
+  };
+}
+
 function createSqlClient(
   client: Pool,
   mode: 'postgres' | 'embedded'
 ): DatabaseClient {
-  const insertSql =
-    mode === 'embedded'
-      ? `
-          insert into generation_logs (
-            id,
-            prompt,
-            generation_options,
-            success,
-            voxel_count,
-            color_count,
-            warnings,
-            template_match,
-            error_message,
-            created_at
-          )
-          values ($1, $2, $3::jsonb, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10)
-        `
-      : `
-          insert into generation_logs (
-            prompt,
-            generation_options,
-            success,
-            voxel_count,
-            color_count,
-            warnings,
-            template_match,
-            error_message,
-            created_at
-          )
-          values ($1, $2, $3::jsonb, $4, $5, $6::jsonb, $7::jsonb, $8, $9)
-        `;
+  const insertSql = `
+    insert into generation_logs (
+      prompt,
+      generation_options,
+      success,
+      voxel_count,
+      color_count,
+      warnings,
+      template_match,
+      error_message,
+      created_at
+    )
+    values ($1, $2, $3::jsonb, $4, $5, $6::jsonb, $7::jsonb, $8, $9)
+  `;
 
   return {
     mode,
@@ -250,10 +216,7 @@ function createSqlClient(
         payload.created_at,
       ];
 
-      await client.query(
-        insertSql,
-        mode === 'embedded' ? [embeddedGenerationLogId++, ...baseParams] : baseParams
-      );
+      await client.query(insertSql, baseParams);
     },
     async listGenerationLogs(limit = 10) {
       await ensureSchemaReady();
@@ -307,14 +270,17 @@ export function getDb(): DatabaseClient {
     return db;
   }
 
+  if (isEmbeddedDbEnabled()) {
+    db = createEmbeddedClient();
+    return db;
+  }
+
   const client = getPool();
   if (!client) {
     db = createNoopClient();
     return db;
   }
 
-  db = isEmbeddedDbEnabled()
-    ? createSqlClient(client, 'embedded')
-    : createSqlClient(client, 'postgres');
+  db = createSqlClient(client, 'postgres');
   return db;
 }
