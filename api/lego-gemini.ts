@@ -11,7 +11,6 @@ import {
   validateAndRepairVoxelArray,
 } from './lib/voxelPostprocess';
 import { saveGenerationRecord } from './lib/saveGeneration';
-import { getDb } from './lib/db';
 
 type VercelLikeRequest = {
   method?: string;
