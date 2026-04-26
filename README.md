@@ -6,8 +6,7 @@
 
 # Voxel Toy Box
 
-Vercel-first voxel generation app with a React frontend, a server-side Gemini API, and Postgres-backed generation logging.
-It now also includes a Vercel route for calling Kimi (Moonshot) with the same voxel-generation contract.
+Vercel-first voxel generation app with a React frontend, a server-side Kimi API, and Postgres-backed generation logging.
 
 ## Local Development
 
@@ -19,7 +18,7 @@ Prerequisites:
 
 Setup:
 1. Copy `.env.example` to `.env.local`
-2. Fill in `GEMINI_API_KEY` and/or `KIMI_API_KEY`
+2. Fill in `KIMI_API_KEY`
 3. Choose one database path for local testing:
 	- Fill in `DATABASE_URL` for a real Postgres instance
 	- Or set `LOCAL_DB_MODE=memory` for the in-memory database used in local connectivity tests
@@ -66,7 +65,6 @@ npm.cmd run build
 
 Primary backend endpoint:
 ```text
-/api/lego-gemini
 /api/lego-kimi
 ```
 
@@ -78,7 +76,6 @@ Debug endpoints:
 
 ## Environment Variables
 
-- `GEMINI_API_KEY`: required for server-side generation
 - `KIMI_API_KEY`: required for server-side Kimi generation
 - `KIMI_MODEL`: optional override for the Kimi model, defaults to `moonshot-v1-8k`
 - `DATABASE_URL`: optional Postgres connection string for persistent generation logs
@@ -88,13 +85,31 @@ Debug endpoints:
 
 ## Kimi Vercel Route
 
-Kimi is exposed as a server-side Vercel route at:
+Kimi is exposed as the server-side Vercel route at:
 
 ```text
 /api/lego-kimi
 ```
 
-It follows the same request and response shape as `/api/lego-gemini`, so existing frontend code or test harnesses can switch providers with only an endpoint change.
+It is the primary generation route and returns the shared backend response shape used by the frontend.
+
+## Failure Log Reporting
+
+Database-backed generation logs can be queried through:
+
+```text
+/api/debug/generation-logs
+```
+
+Supported examples:
+
+```text
+/api/debug/generation-logs?limit=10
+/api/debug/generation-logs?status=failure
+/api/debug/generation-logs?success=false&limit=20
+```
+
+Failure reports include stored `error_message`, `warnings`, and the original generation options.
 
 ## Proxy Notes
 
