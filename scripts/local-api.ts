@@ -2,7 +2,6 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { URL } from 'node:url';
-import legoGeminiHandler from '../api/lego-gemini';
 import legoKimiHandler from '../api/lego-kimi';
 import dbHealthHandler from '../api/debug/db-health';
 import generationLogsHandler from '../api/debug/generation-logs';
@@ -58,7 +57,6 @@ function loadLocalEnv() {
 loadLocalEnv();
 
 const routes = new Map<string, Handler>([
-  ['/api/lego-gemini', legoGeminiHandler as Handler],
   ['/api/lego-kimi', legoKimiHandler as Handler],
   ['/api/debug/db-health', dbHealthHandler as Handler],
   ['/api/debug/generation-logs', generationLogsHandler as Handler],
