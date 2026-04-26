@@ -36,8 +36,6 @@
     "node_modules",
     "dist",
     "template-routing-lab",
-    "vite.config.ts",
-    "services/localApi.ts",
-    "api/lib/services"
+    "vite.config.ts"
   ]
 }
