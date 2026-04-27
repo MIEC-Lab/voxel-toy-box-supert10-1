@@ -78,13 +78,24 @@ function getKimiModel() {
 }
 
 function extractTextFromCompletion(completion: OpenAI.Chat.Completions.ChatCompletion) {
-  const content = completion.choices[0]?.message?.content;
+  const content = completion.choices[0]?.message?.content as unknown;
   if (!content) {
     return '';
   }
 
   if (typeof content === 'string') {
     return content;
+  }
+
+  if (Array.isArray(content)) {
+    const textParts = content
+      .map((part) => {
+        if (!part || typeof part !== 'object') return '';
+        const maybeText = (part as { text?: unknown }).text;
+        return typeof maybeText === 'string' ? maybeText : '';
+      })
+      .filter(Boolean);
+    return textParts.join('\n');
   }
 
   return '';
@@ -101,6 +112,13 @@ function parseJsonResponse<T>(rawText: string, fallbackMessage: string): T {
     const fencedMatch = rawText.match(/```json\s*([\s\S]*?)```/i) || rawText.match(/```\s*([\s\S]*?)```/i);
     if (fencedMatch?.[1]) {
       return JSON.parse(fencedMatch[1]) as T;
+    }
+
+    const firstBrace = rawText.indexOf('{');
+    const lastBrace = rawText.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      const maybeJson = rawText.slice(firstBrace, lastBrace + 1);
+      return JSON.parse(maybeJson) as T;
     }
 
     throw new Error(fallbackMessage);
