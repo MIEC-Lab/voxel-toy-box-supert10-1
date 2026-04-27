@@ -5,13 +5,13 @@ import type {
   ModelIntent,
   VoxelData,
 } from '../../../types';
-import { configureOutboundProxyOnce } from '../networkProxy';
+import { configureOutboundProxyOnce } from '../networkProxy.js';
 import {
   buildModelIntent,
   getIntentPrompt,
   getLLMMessageContent,
   getVoxelPromptFromIntent,
-} from './modelCallTypes';
+} from './modelCallTypes.js';
 
 type KimiJsonEnvelope<T> = {
   result?: T;
@@ -49,10 +49,7 @@ function extractTextFromCompletion(completion: OpenAI.Chat.Completions.ChatCompl
     return content;
   }
 
-  return content
-    .map((item) => ('text' in item ? item.text ?? '' : ''))
-    .join('')
-    .trim();
+  return '';
 }
 
 function parseJsonResponse<T>(rawText: string, fallbackMessage: string): T {

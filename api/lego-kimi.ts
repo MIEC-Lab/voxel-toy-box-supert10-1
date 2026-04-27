@@ -4,13 +4,13 @@ import type {
   GenerationOptions,
   LegoApiCallRequest,
 } from '../types';
-import generateKimiVoxelResult from './lib/generation/kimi';
-import { inferTemplateMatch } from './lib/templateMatcher';
+import generateKimiVoxelResult from './lib/generation/kimi.js';
+import { inferTemplateMatch } from './lib/templateMatcher.js';
 import {
   calculateMetadataFromVoxels,
   validateAndRepairVoxelArray,
-} from './lib/voxelPostprocess';
-import { saveGenerationRecord } from './lib/saveGeneration';
+} from './lib/voxelPostprocess.js';
+import { saveGenerationRecord } from './lib/saveGeneration.js';
 
 type VercelLikeRequest = {
   method?: string;
@@ -87,27 +87,26 @@ export default async function handler(req: any, res: any) {
       stats: postprocess.stats,
       metadata,
       templateMatch,
+      databaseReport: await saveGenerationRecord({
+        prompt,
+        options: generationOptions ?? {},
+        success: true,
+        voxelCount: metadata.voxelCount,
+        colorCount: metadata.colorCount,
+        warnings: postprocess.warnings,
+        templateMatch,
+      }),
       mode,
       usedTwoStage,
       intent,
     };
-
-    await saveGenerationRecord({
-      prompt,
-      options: generationOptions ?? {},
-      success: true,
-      voxelCount: metadata.voxelCount,
-      colorCount: metadata.colorCount,
-      warnings: postprocess.warnings,
-      templateMatch,
-    });
 
     return res.status(200).json(response);
   } catch (error) {
     const message = getErrorMessage(error);
     const fallbackBody = parseRequestBody(req.body);
 
-    await saveGenerationRecord({
+    const databaseReport = await saveGenerationRecord({
       prompt: fallbackBody?.prompt ?? '',
       options: fallbackBody?.options ?? fallbackBody?.params ?? {},
       success: false,
@@ -123,6 +122,7 @@ export default async function handler(req: any, res: any) {
       warnings: ['The backend request failed before a valid voxel result was produced.'],
       error: message,
       errorCode: 'KIMI_GENERATION_FAILED',
+      databaseReport,
       mode: 'fast',
       usedTwoStage: false,
     };
