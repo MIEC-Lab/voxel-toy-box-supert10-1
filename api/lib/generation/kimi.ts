@@ -125,6 +125,28 @@ function parseJsonResponse<T>(rawText: string, fallbackMessage: string): T {
   }
 }
 
+async function repairMalformedJsonWithKimi(rawText: string): Promise<string> {
+  const client = createKimiClient();
+  const completion = await client.chat.completions.create({
+    model: getKimiModel(),
+    response_format: { type: 'json_object' },
+    messages: [
+      {
+        role: 'user',
+        content: `You are a strict JSON repair tool.
+Repair the following malformed JSON payload and return ONLY valid JSON.
+Do not add commentary.
+
+Malformed payload:
+${rawText}`,
+      },
+    ],
+    temperature: 0,
+  });
+
+  return extractTextFromCompletion(completion);
+}
+
 async function requestKimiJson<T>(
   prompt: string,
   fallbackMessage: string
@@ -143,7 +165,21 @@ async function requestKimiJson<T>(
   });
 
   const rawText = extractTextFromCompletion(completion);
-  return parseJsonResponse<T>(rawText, fallbackMessage);
+
+  try {
+    return parseJsonResponse<T>(rawText, fallbackMessage);
+  } catch (parseError) {
+    if (!rawText.trim()) {
+      throw parseError;
+    }
+
+    try {
+      const repairedText = await repairMalformedJsonWithKimi(rawText);
+      return parseJsonResponse<T>(repairedText, fallbackMessage);
+    } catch {
+      throw parseError;
+    }
+  }
 }
 
 export async function callKimiFastMode(
