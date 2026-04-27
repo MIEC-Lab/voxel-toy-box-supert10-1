@@ -205,29 +205,48 @@ function parseJsonResponse<T>(rawText: string, fallbackMessage: string): T {
     }
   }
 
+  // Last local recovery: salvage x/y/z/color object lines and wrap as { voxels: [...] }.
+  const looseVoxelMatches = rawText.match(/\{[^{}]*?"x"\s*:\s*-?\d+[^{}]*?"y"\s*:\s*-?\d+[^{}]*?"z"\s*:\s*-?\d+[^{}]*?"color"\s*:\s*(?:"#[0-9A-Fa-f]{3,8}"|\d+)[^{}]*?\}/g);
+  if (looseVoxelMatches && looseVoxelMatches.length > 0) {
+    const voxelListText = `[${looseVoxelMatches.join(',')}]`;
+    const voxelArray = (() => {
+      try {
+        return JSON.parse(voxelListText) as unknown[];
+      } catch {
+        return null;
+      }
+    })();
+    if (voxelArray) {
+      return { voxels: voxelArray } as T;
+    }
+  }
+
   throw new Error(fallbackMessage);
 }
 
-async function repairMalformedJsonWithKimi(rawText: string): Promise<string> {
-  const client = createKimiClient();
-  const completion = await client.chat.completions.create({
-    model: getKimiModel(),
-    response_format: { type: 'json_object' },
-    messages: [
-      {
-        role: 'user',
-        content: `You are a strict JSON repair tool.
-Repair the following malformed JSON payload and return ONLY valid JSON.
-Do not add commentary.
+function buildDeterministicFallbackVoxels(intent: ModelIntent): VoxelData[] {
+  const maxSide = intent.size === 'small' ? 4 : intent.size === 'large' ? 7 : 5;
+  const half = Math.floor(maxSide / 2);
+  const colorByScheme: Record<ModelIntent['colorScheme'], number> = {
+    vibrant: 0xff5500,
+    pastel: 0xf6bcd2,
+    monochrome: 0x777777,
+    nature: 0x4f7f39,
+  };
+  const baseColor = colorByScheme[intent.colorScheme] ?? 0x999999;
 
-Malformed payload:
-${rawText}`,
-      },
-    ],
-    temperature: 0,
-  });
+  const voxels: VoxelData[] = [];
+  for (let x = -half; x <= half; x += 1) {
+    for (let z = -half; z <= half; z += 1) {
+      voxels.push({ x, y: 0, z, color: baseColor });
+    }
+  }
 
-  return extractTextFromCompletion(completion);
+  for (let y = 1; y <= Math.max(2, Math.floor(maxSide / 2)); y += 1) {
+    voxels.push({ x: 0, y, z: 0, color: baseColor });
+  }
+
+  return voxels;
 }
 
 async function requestKimiJson<T>(
@@ -249,20 +268,7 @@ async function requestKimiJson<T>(
 
   const rawText = extractTextFromCompletion(completion);
 
-  try {
-    return parseJsonResponse<T>(rawText, fallbackMessage);
-  } catch (parseError) {
-    if (!rawText.trim()) {
-      throw parseError;
-    }
-
-    try {
-      const repairedText = await repairMalformedJsonWithKimi(rawText);
-      return parseJsonResponse<T>(repairedText, fallbackMessage);
-    } catch {
-      throw parseError;
-    }
-  }
+  return parseJsonResponse<T>(rawText, fallbackMessage);
 }
 
 export async function callKimiFastMode(
@@ -288,11 +294,10 @@ Return valid JSON in this shape:
     return { intent: defaultIntent, voxels };
   }
 
-  // Fallback: if fast-mode payload is structurally valid but misses voxels,
-  // recover by generating voxels from an extracted or default intent.
+  // Keep fast mode to a single external call to avoid Vercel duration limits.
   const recoveredIntent = extractIntentFromUnknownPayload(envelope) ?? defaultIntent;
-  const recoveredVoxels = await callKimiVoxelFromIntent(systemContext, recoveredIntent);
-  return { intent: recoveredIntent, voxels: recoveredVoxels };
+  const fallbackVoxels = buildDeterministicFallbackVoxels(recoveredIntent);
+  return { intent: recoveredIntent, voxels: fallbackVoxels };
 }
 
 export async function callKimiIntent(
@@ -345,7 +350,7 @@ Return valid JSON in this shape:
 
   const voxels = extractVoxelsFromUnknownPayload(envelope);
   if (!voxels || voxels.length === 0) {
-    throw new Error('Kimi voxel stage returned no voxel payload.');
+    return buildDeterministicFallbackVoxels(intent);
   }
 
   return voxels;
