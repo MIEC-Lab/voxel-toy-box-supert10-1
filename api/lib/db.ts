@@ -101,6 +101,22 @@ function getDatabaseUrl() {
   );
 }
 
+function normalizeConnectionStringSslMode(connectionString: string) {
+  try {
+    const parsed = new URL(connectionString);
+    const sslMode = parsed.searchParams.get('sslmode')?.trim().toLowerCase();
+
+    if (sslMode === 'prefer' || sslMode === 'require' || sslMode === 'verify-ca') {
+      // Keep today's strict behavior and silence pg v9 migration warning.
+      parsed.searchParams.set('sslmode', 'verify-full');
+    }
+
+    return parsed.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function isEmbeddedDbEnabled() {
   return process.env.LOCAL_DB_MODE === 'memory';
 }
@@ -110,7 +126,10 @@ async function getPool() {
     return pool;
   }
 
-  const connectionString = getDatabaseUrl();
+  const rawConnectionString = getDatabaseUrl();
+  const connectionString = rawConnectionString
+    ? normalizeConnectionStringSslMode(rawConnectionString)
+    : null;
 
   if (!connectionString) {
     return null;
