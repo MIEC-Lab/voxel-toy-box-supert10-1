@@ -6,7 +6,6 @@
     "useDefineForClassFields": false,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
     "types": ["node", "vite/client"],
     "jsx": "react-jsx",
     "baseUrl": ".",
