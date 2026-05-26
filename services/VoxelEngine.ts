@@ -9,6 +9,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { AppState, SimulationVoxel, RebuildTarget, VoxelData } from '../types';
 import { CONFIG, COLORS } from '@/utils/voxelConstants';
 
+interface LayerData {
+  y: number;
+  voxelIndices: number[];
+}
+
 export class VoxelEngine {
   private container: HTMLElement;
   private scene: THREE.Scene;
@@ -21,6 +26,11 @@ export class VoxelEngine {
   private voxels: SimulationVoxel[] = [];
   private rebuildTargets: RebuildTarget[] = [];
   private rebuildStartTime: number = 0;
+  
+  private layers: LayerData[] = [];
+  private visibleLayerCount: number = 0;
+  private layerRevealTime: number = 0;
+  private layerInterval: number = 120;
   
   private state: AppState = AppState.STABLE;
   private onStateChange: (state: AppState) => void;
@@ -47,7 +57,7 @@ export class VoxelEngine {
     // Slightly zoomed out start position
     this.camera.position.set(30, 30, 60);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -91,6 +101,66 @@ export class VoxelEngine {
     this.createVoxels(data);
     this.onCountChange(this.voxels.length);
     this.state = AppState.STABLE;
+    this.onStateChange(this.state);
+  }
+
+  public loadModelLayered(data: VoxelData[]) {
+    const voxelMap = new Map<number, VoxelData[]>();
+    for (const v of data) {
+      let group = voxelMap.get(v.y);
+      if (!group) {
+        group = [];
+        voxelMap.set(v.y, group);
+      }
+      group.push(v);
+    }
+
+    const sortedYs = Array.from(voxelMap.keys()).sort((a, b) => a - b);
+    this.layers = sortedYs.map((y) => ({ y, voxelIndices: [] }));
+
+    this.voxels = [];
+    let globalIdx = 0;
+    for (const layer of this.layers) {
+      const group = voxelMap.get(layer.y)!;
+      for (const v of group) {
+        const c = new THREE.Color(v.color);
+        c.offsetHSL(0, 0, (Math.random() * 0.1) - 0.05);
+        this.voxels.push({
+          id: globalIdx,
+          x: v.x, y: v.y, z: v.z, color: c,
+          vx: 0, vy: 0, vz: 0, rx: 0, ry: 0, rz: 0,
+          rvx: 0, rvy: 0, rvz: 0,
+        });
+        layer.voxelIndices.push(globalIdx);
+        globalIdx++;
+      }
+    }
+
+    if (this.instanceMesh) {
+      this.scene.remove(this.instanceMesh);
+      this.instanceMesh.geometry.dispose();
+      if (Array.isArray(this.instanceMesh.material)) {
+        this.instanceMesh.material.forEach(m => m.dispose());
+      } else {
+        this.instanceMesh.material.dispose();
+      }
+    }
+
+    const geometry = new THREE.BoxGeometry(CONFIG.VOXEL_SIZE - 0.05, CONFIG.VOXEL_SIZE - 0.05, CONFIG.VOXEL_SIZE - 0.05);
+    const material = new THREE.MeshStandardMaterial({ roughness: 0.8, metalness: 0.1 });
+    this.instanceMesh = new THREE.InstancedMesh(geometry, material, this.voxels.length);
+    this.instanceMesh.castShadow = true;
+    this.instanceMesh.receiveShadow = true;
+    this.scene.add(this.instanceMesh);
+
+    this.draw();
+    this.instanceMesh.count = 0;
+
+    this.visibleLayerCount = 0;
+    this.layerRevealTime = performance.now();
+
+    this.onCountChange(this.voxels.length);
+    this.state = AppState.LAYER_BUILDING;
     this.onStateChange(this.state);
   }
 
@@ -271,12 +341,36 @@ export class VoxelEngine {
     }
   }
 
+  private updateLayerBuilding() {
+    if (this.state !== AppState.LAYER_BUILDING) return;
+
+    const now = performance.now();
+    if (now - this.layerRevealTime < this.layerInterval) return;
+
+    this.layerRevealTime = now;
+    this.visibleLayerCount++;
+
+    let visibleCount = 0;
+    for (let li = 0; li < this.visibleLayerCount && li < this.layers.length; li++) {
+      visibleCount += this.layers[li].voxelIndices.length;
+    }
+
+    if (this.instanceMesh) {
+      this.instanceMesh.count = visibleCount;
+    }
+
+    if (this.visibleLayerCount >= this.layers.length) {
+      this.state = AppState.STABLE;
+      this.onStateChange(this.state);
+    }
+  }
+
   private animate() {
     this.animationId = requestAnimationFrame(this.animate);
     this.controls.update();
     this.updatePhysics();
+    this.updateLayerBuilding();
     
-    // Optimize: only draw if moving
     if (this.state !== AppState.STABLE || this.controls.autoRotate) {
         this.draw();
     }
@@ -315,6 +409,21 @@ export class VoxelEngine {
         colors.add('#' + v.color.getHexString());
     });
     return Array.from(colors);
+  }
+
+  public setBackgroundColor(color: string) {
+    this.scene.background = new THREE.Color(color);
+  }
+
+  public resetCamera() {
+    this.camera.position.set(30, 30, 60);
+    this.controls.target.set(0, 5, 0);
+    this.controls.update();
+  }
+
+  public captureScreenshot(): string {
+    this.renderer.render(this.scene, this.camera);
+    return this.renderer.domElement.toDataURL('image/png');
   }
 
   public cleanup() {
