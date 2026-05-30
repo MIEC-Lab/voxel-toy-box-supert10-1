@@ -1,3 +1,5 @@
+#Hujialuo
+  
 import React from 'react';
 import { GenerationResultMeta } from './GenerationResultMeta';
 import { GenerationError } from './ErrorDisplay';
