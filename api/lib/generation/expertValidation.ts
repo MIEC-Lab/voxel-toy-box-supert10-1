@@ -1,6 +1,7 @@
 import type { GenerationStats, ModelIntent, VoxelData } from '../../../types';
 import { validateAndRepairVoxelArray } from '../voxelPostprocess.js';
 
+// Bian Ziling: expert-mode local validation and repair feedback for structured voxel generation.
 const EXPECTED_SIZE_LIMITS: Record<
   ModelIntent['size'],
   { minDimension: number; maxDimension: number; minHeight: number }
