@@ -342,6 +342,7 @@ ${repairFeedback.map((item, index) => `${index + 1}. ${item}`).join('\n')}
 `
       : '';
 
+  // Bian Ziling: second-stage expert prompt enforces detailed constraints and requests a compliance report.
   return `
 ${systemContext}
 
