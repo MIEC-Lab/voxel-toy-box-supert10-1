@@ -142,6 +142,7 @@ async function withGeminiRetry<T>(stage: string, operation: () => Promise<T>): P
   throw decorateGeminiError(lastError, stage);
 }
 
+// Bian Ziling: keep Gemini expert mode on structured JSON output for voxel generation.
 function getVoxelSchema() {
   return {
     type: Type.OBJECT,
@@ -404,6 +405,7 @@ export async function generateGeminiVoxelResult(
   mode: BackendGenerationMode,
   useTwoStage: boolean
 ): Promise<{ voxels: VoxelData[]; intent: ModelIntent; usedTwoStage: boolean }> {
+  // Bian Ziling: expert mode uses intent-first planning and then voxel generation.
   if (mode === 'expert' || useTwoStage) {
     const safeOptions = options ?? {};
     const rawIntent = await callGeminiIntent(systemContext, prompt, safeOptions);

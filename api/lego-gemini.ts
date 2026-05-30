@@ -29,6 +29,7 @@ function parseRequestBody(body: VercelLikeRequest['body']): LegoApiCallRequest {
   return body;
 }
 
+// Bian Ziling: map frontend mode and advanced parameters into the backend Gemini route.
 function resolveMode(
   requestedMode: LegoApiCallRequest['mode'],
   options?: GenerationOptions
@@ -89,6 +90,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const mode = resolveMode(data.mode, generationOptions);
+    // Bian Ziling: expert mode can explicitly force the real two-stage Gemini pipeline.
     const shouldUseTwoStage = useTwoStage ?? mode === 'expert';
 
     const { voxels: rawVoxels, intent, usedTwoStage } =

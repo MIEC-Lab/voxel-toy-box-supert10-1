@@ -13,6 +13,7 @@ const BUDGET_BY_SIZE: Record<NonNullable<GenerationOptions['size']>, number> = {
   large: 320,
 };
 
+// Bian Ziling: translate advanced frontend parameters into reusable prompt-side rules.
 const STYLE_RULES: Record<NonNullable<GenerationOptions['style']>, string> = {
   realistic:
     'Prefer believable proportions, recognizable silhouettes, restrained decoration, and stable structural choices.',
@@ -192,6 +193,7 @@ function buildFallbackPose(prompt: string) {
   return 'front-facing stable pose with clear weight distribution';
 }
 
+// Bian Ziling: build a structured fallback intent from prompt plus advanced parameters.
 const buildFallbackIntent = (
   prompt: string,
   options?: GenerationOptions
