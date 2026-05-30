@@ -1,3 +1,5 @@
+#Hujialuo
+  
 import React from 'react';
 import { Hammer, Wrench, Download, Image as ImageIcon, Share2, Box, ChevronRight } from 'lucide-react';
 import { GenerationMetadata } from '../types';
