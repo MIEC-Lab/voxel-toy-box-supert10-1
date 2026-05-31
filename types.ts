@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-
+//Chen Zhuo(Refactor types and add generation interfaces)
 import type * as THREE from 'three';
 
 export enum AppState {
