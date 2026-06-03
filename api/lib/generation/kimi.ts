@@ -114,6 +114,7 @@ function extractVoxelsFromUnknownPayload(payload: unknown): VoxelData[] | null {
 
 const DEFAULT_KIMI_MODEL = 'moonshot-v1-8k';
 
+//Chenhong Lin
 function createKimiClient() {
   configureOutboundProxyOnce();
 
@@ -128,10 +129,12 @@ function createKimiClient() {
   });
 }
 
+//Chenhong Lin
 function getKimiModel() {
   return process.env.KIMI_MODEL || DEFAULT_KIMI_MODEL;
 }
 
+//Chenhong Lin
 function extractTextFromCompletion(completion: OpenAI.Chat.Completions.ChatCompletion) {
   const content = completion.choices[0]?.message?.content as unknown;
   if (!content) {
@@ -156,6 +159,7 @@ function extractTextFromCompletion(completion: OpenAI.Chat.Completions.ChatCompl
   return '';
 }
 
+//Chenhong Lin
 function parseJsonResponse<T>(rawText: string, fallbackMessage: string): T {
   if (!rawText.trim()) {
     throw new Error(fallbackMessage);
@@ -250,6 +254,7 @@ function buildDeterministicFallbackVoxels(intent: ModelIntent): VoxelData[] {
   return voxels;
 }
 
+//Chenhong Lin
 async function requestKimiJson<T>(
   prompt: string,
   fallbackMessage: string
@@ -272,6 +277,7 @@ async function requestKimiJson<T>(
   return parseJsonResponse<T>(rawText, fallbackMessage);
 }
 
+//Chenhong Lin
 export async function callKimiFastMode(
   systemContext: string,
   prompt: string,
@@ -301,6 +307,7 @@ Return valid JSON in this shape:
   return { intent: recoveredIntent, voxels: fallbackVoxels };
 }
 
+//Chenhong Lin
 export async function callKimiIntent(
   systemContext: string,
   prompt: string,
@@ -342,6 +349,7 @@ Return valid JSON in this shape:
   return intent;
 }
 
+//Chenhong Lin
 export async function callKimiVoxelFromIntent(
   systemContext: string,
   intent: ModelIntent
@@ -374,6 +382,7 @@ Return valid JSON in this shape:
   return voxels;
 }
 
+//Chenhong Lin
 export async function generateKimiVoxelResult(
   systemContext: string,
   prompt: string,
