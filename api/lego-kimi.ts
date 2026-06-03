@@ -17,6 +17,7 @@ type VercelLikeRequest = {
   body?: LegoApiCallRequest | string | null;
 };
 
+//Chenhong Lin
 function parseRequestBody(body: VercelLikeRequest['body']): LegoApiCallRequest {
   if (!body) {
     return {} as LegoApiCallRequest;
@@ -29,6 +30,7 @@ function parseRequestBody(body: VercelLikeRequest['body']): LegoApiCallRequest {
   return body;
 }
 
+//Chenhong Lin
 function resolveMode(
   requestedMode: LegoApiCallRequest['mode'],
   options?: GenerationOptions
@@ -38,10 +40,12 @@ function resolveMode(
   return options ? 'expert' : 'fast';
 }
 
+//Chenhong Lin
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Unknown backend generation error.';
 }
 
+//Chenhong Lin
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
