@@ -11,6 +11,7 @@ const DEFAULT_SYSTEM_CONTEXT = [
   'Keep the result centered, connected, and visually readable.',
 ].join(' ');
 
+//Chenhong Lin
 export async function generateVoxelModel(
   prompt: string,
   options: GenerationOptions,
