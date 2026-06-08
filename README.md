@@ -6,7 +6,7 @@
 
 # Voxel Toy Box
 
-Vercel-first voxel generation app with a React frontend, a server-side Kimi API, and Postgres-backed generation logging.
+Vercel-first voxel generation app with a React frontend, a server-side Gemini API, and Postgres-backed generation logging.
 
 ## Local Development
 
@@ -18,7 +18,7 @@ Prerequisites:
 
 Setup:
 1. Copy `.env.example` to `.env.local`
-2. Fill in `KIMI_API_KEY`
+2. Fill in `GEMINI_API_KEY`
 3. Choose one database path for local testing:
 	- Fill in `DATABASE_URL` for a real Postgres instance
 	- Or set `LOCAL_DB_MODE=memory` for the in-memory database used in local connectivity tests
@@ -39,7 +39,7 @@ npm.cmd run dev:vercel
 Use this sequence for first-time verification on this machine, then move to Vercel deployment.
 
 1. Prepare `.env.local`
-	- Set `KIMI_API_KEY` (required)
+	- Set `GEMINI_API_KEY` (required)
 	- Keep `DATABASE_URL` optional for first pass
 2. Install dependencies
 	- `npm.cmd install`
@@ -65,7 +65,7 @@ npm.cmd run build
 
 Primary backend endpoint:
 ```text
-/api/lego-kimi
+/api/lego-gemini
 ```
 
 Debug endpoints:
@@ -76,22 +76,24 @@ Debug endpoints:
 
 ## Environment Variables
 
-- `KIMI_API_KEY`: required for server-side Kimi generation
+- `GEMINI_API_KEY`: required for server-side Gemini generation
+- `GEMINI_MODEL`: optional override for the Gemini model
+- `KIMI_API_KEY`: optional for the legacy/backup Kimi route
 - `KIMI_MODEL`: optional override for the Kimi model, defaults to `moonshot-v1-8k`
 - `DATABASE_URL`: optional Postgres connection string for persistent generation logs
 - `LOCAL_DB_MODE=memory`: enables the embedded local database when no real Postgres is available
 - `LOCAL_PROXY_URL`: optional explicit outbound proxy for local Node server calls; if omitted on Windows, the app will also try to detect the user-level system proxy
 - `VITE_API_BASE_URL`: optional frontend override, defaults to `/api/`
 
-## Kimi Vercel Route
+## Gemini Vercel Route
 
-Kimi is exposed as the server-side Vercel route at:
+Gemini is the primary server-side Vercel route used by the frontend at:
 
 ```text
-/api/lego-kimi
+/api/lego-gemini
 ```
 
-It is the primary generation route and returns the shared backend response shape used by the frontend.
+It returns the shared backend response shape used by the frontend. The Kimi route remains available at `/api/lego-kimi` as a backup or legacy endpoint.
 
 ## Failure Log Reporting
 
@@ -113,7 +115,7 @@ Failure reports include stored `error_message`, `warnings`, and the original gen
 
 ## Proxy Notes
 
-If Kimi requests fail with network errors such as `fetch failed sending request`, check the local proxy guidance in [harness/PROXY_GUIDE.md](./harness/PROXY_GUIDE.md).
+If Gemini requests fail with network errors such as `fetch failed sending request`, check the local proxy guidance in [harness/PROXY_GUIDE.md](./harness/PROXY_GUIDE.md).
 
 Current local behavior:
 - On Windows, the server will try to auto-detect the user-level system proxy from Internet Settings
@@ -121,7 +123,7 @@ Current local behavior:
 - The proxy is only used for server-side outbound model calls, not for browser-side routing
 
 Current status on this machine:
-- Kimi outbound network access is no longer blocked at transport layer
+- Gemini outbound network access is no longer blocked at transport layer
 - `fetch failed sending request` is treated as a network/proxy issue
 - `API_KEY_INVALID` means network is working and the blocker has moved to key validity
 
@@ -132,3 +134,6 @@ Current status on this machine:
 - debug redeploy trigger
 
   
+
+
+
